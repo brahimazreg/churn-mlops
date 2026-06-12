@@ -1,8 +1,7 @@
 from joblib import load
 from src.config import MODEL_PATH
 from src.features import add_features
-from src.api import log_prediction
-
+from src.monitoring import log_prediction
 
 model = load(MODEL_PATH)
 
@@ -13,15 +12,11 @@ def predict(df):
     pred = model.predict(df)
     prob = model.predict_proba(df)[:, 1]
 
-    result = {
-        "prediction": int(pred[0]),
-        "probability": float(prob[0])
-        }
-
+    # logging (safe conversion)
     log_prediction(
-        df.model_dump(),
-        result["prediction"],
-        result["probability"]
-)
+        df.to_dict(),
+        int(pred[0]),
+        float(prob[0])
+    )
 
-    return result 
+    return pred, prob
