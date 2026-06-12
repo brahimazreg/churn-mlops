@@ -1,17 +1,21 @@
-import mlflow
-
-mlflow.set_tracking_uri("sqlite:///mlflow.db")
-
-exp = mlflow.get_experiment_by_name("churn_prediction")
-print("Experiment:", exp)
-
-runs = mlflow.search_runs(
-    experiment_ids=[exp.experiment_id]
-)
-
-print("Number of runs:", len(runs))
-
-if len(runs) > 0:
-    print(runs[["run_id", "status"]])
-else:
-    print("No runs found")
+{
+  "gender": "Male",
+  "SeniorCitizen": 0,
+  "Partner": "Yes",
+  "Dependents": "No",
+  "tenure": 12,
+  "PhoneService": "Yes",
+  "MultipleLines": "No",
+  "InternetService": "Fiber optic",
+  "OnlineSecurity": "No",
+  "OnlineBackup": "Yes",
+  "DeviceProtection": "No",
+  "TechSupport": "No",
+  "StreamingTV": "Yes",
+  "StreamingMovies": "Yes",
+  "Contract": "Month-to-month",
+  "PaperlessBilling": "Yes",
+  "PaymentMethod": "Electronic check",
+  "MonthlyCharges": 75.0,
+  "TotalCharges": 900.0
+}

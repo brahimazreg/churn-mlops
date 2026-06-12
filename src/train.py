@@ -1,7 +1,7 @@
 
 
 from joblib import dump
-
+from src.features import add_features
 from src.data_processing import  load_data ,get_processor 
 from src.config import *
 from src.evaluate import evaluate_model
@@ -9,6 +9,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from imblearn.pipeline import Pipeline
 from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import FunctionTransformer
 import mlflow
 
 
@@ -37,14 +38,12 @@ def train_model():
         stratify=Y
         )
 
-        pipeline_lr = Pipeline([
+        pipeline_lr= Pipeline(steps=[
+        ("features", FunctionTransformer(add_features)),
         ("preprocess", preprocessor),
         ("smote", SMOTE(random_state=RANDOM_STATE)),
-        ("model", LogisticRegression(
-            max_iter=1000,
-            random_state=RANDOM_STATE
-        ))
-        ])
+        ("model", LogisticRegression(max_iter=1000))
+    ])
 
         pipeline_lr.fit(X_train, Y_train)
 
@@ -79,11 +78,7 @@ def train_model():
                report,
               "classification_report.txt"
         )
-        mlflow.log_param("max_iter", 1000)
-
-       
-
-       
+        mlflow.log_param("max_iter", 1000)       
 
         mlflow.sklearn.log_model(
             sk_model=pipeline_lr,

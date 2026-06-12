@@ -1,11 +1,14 @@
 from joblib import load
 from src.config import MODEL_PATH
+from src.features import add_features
 
 model = load(MODEL_PATH)
 
+def predict(df):
 
-def predict(data):
-    prediction = model.predict(data)
-    probability = model.predict_proba(data)[:, 1]
+    df = add_features(df)
 
-    return prediction, probability
+    pred = model.predict(df)
+    prob = model.predict_proba(df)[:, 1]
+
+    return pred, prob

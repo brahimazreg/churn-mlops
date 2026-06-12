@@ -1,6 +1,5 @@
-import pandas as pd
 from src.predict import predict
-
+import pandas as pd
 
 def test_prediction():
 
@@ -23,8 +22,7 @@ def test_prediction():
         "PaperlessBilling": ["Yes"],
         "PaymentMethod": ["Electronic check"],
         "MonthlyCharges": [75.0],
-        "TotalCharges": [900.0],
-        "tenure_group": ["1-12"]
+        "TotalCharges": [900.0]
     })
 
     pred, prob = predict(sample)
