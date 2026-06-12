@@ -8,6 +8,9 @@ from datetime import datetime
 import json
 from pathlib import Path
 import time
+from src.config import LOG_FILE
+
+
 prediction_count = 0
 
 app = FastAPI(title="Churn Prediction API",
@@ -24,7 +27,8 @@ class PredictionResponse(BaseModel):
     probability: float
 
 
-LOG_FILE = Path("logs/predictions.jsonl")
+
+# LOG_FILE = Path("../logs/predictions.jsonl")
 
 def log_prediction(data, prediction, probability,latency):
     LOG_FILE.parent.mkdir(exist_ok=True)
@@ -33,7 +37,8 @@ def log_prediction(data, prediction, probability,latency):
         "timestamp": datetime.utcnow().isoformat(),
         "input": data,
         "prediction": prediction,
-        "probability": probability
+        "probability": probability,
+        "latency": latency 
     }
 
     with open(LOG_FILE, "a") as f:
@@ -98,13 +103,6 @@ def predict_api(data: CustomerInput):
 def health():
     return {"status": "healthy"}
 
-""" @app.get("/metrics")
-def metrics():
-    return {
-        "total_predictions": prediction_count,
-        "model_name": "LogisticRegression",
-        "model_version": "1.0.0"
-    } """
 
 @app.get("/metrics")
 def metrics():
