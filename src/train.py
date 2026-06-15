@@ -1,101 +1,109 @@
-
-
 from joblib import dump
-from src.features import add_features
 from src.data_processing import  load_data ,get_processor 
 from src.config import *
 from src.evaluate import evaluate_model
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
-from imblearn.pipeline import Pipeline
+from imblearn.pipeline import Pipeline as ImbPipeline
+from sklearn.pipeline import Pipeline as SkPipeline
 from imblearn.over_sampling import SMOTE
-from sklearn.preprocessing import FunctionTransformer
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from pathlib import Path
 import mlflow
-
 
 mlflow.set_tracking_uri("sqlite:///mlflow.db")
 mlflow.set_experiment("churn_prediction") 
 
-print("TRACKING URI:", mlflow.get_tracking_uri())
-print("EXPERIMENT:", mlflow.get_experiment_by_name("churn_prediction"))
 
-def train_model():
-    with mlflow.start_run(run_name="logistic_regression") as run:
-        print("ACTIVE RUN:", mlflow.active_run())
-        print("RUN ID:", run.info.run_id) 
-        
-        # call load_data function to get X , Y
-        X,Y =load_data()
+MODELS = {
+    "lr": LogisticRegression(
+        max_iter=1000,
+        random_state=RANDOM_STATE
+    ),
 
-        # call get_processor function to get preprocessor
-        preprocessor=get_processor()
+    "rfc": RandomForestClassifier(
+        n_estimators=50,
+        random_state=RANDOM_STATE
+    ),
+
+    "xgb": XGBClassifier(
+        n_estimators=50,
+        random_state=RANDOM_STATE
+    )
+}
+#**************
+def train_model(model):
+    with mlflow.start_run(run_name=model.__class__.__name__):
+        X, Y = load_data()
+        preprocessor = get_processor()
 
         X_train, X_test, Y_train, Y_test = train_test_split(
-        X,
-        Y,
-        test_size=TEST_SIZE,
-        random_state=RANDOM_STATE,
-        stratify=Y
+            X,
+            Y,
+            test_size=TEST_SIZE,
+            random_state=RANDOM_STATE,
+            stratify=Y
         )
 
-        pipeline_lr= Pipeline(steps=[
-        ("features", FunctionTransformer(add_features)),
-        ("preprocess", preprocessor),
-        ("smote", SMOTE(random_state=RANDOM_STATE)),
-        ("model", LogisticRegression(max_iter=1000))
-    ])
+        # 🧪 TRAINING PIPELINE (WITH SMOTE)
+        train_pipeline = ImbPipeline([
+            ("preprocess", preprocessor),
+            ("smote", SMOTE(random_state=RANDOM_STATE)),
+            ("model", model)
+        ])
 
-        pipeline_lr.fit(X_train, Y_train)
+        train_pipeline.fit(X_train, Y_train)
 
-        accuracy, roc_auc ,report = evaluate_model(
-            pipeline_lr,
-            X_test,
-            Y_test
-        )
-
-        mlflow.log_param(
-            "model",
-            "LogisticRegression"
-        )
-
-        mlflow.log_param(
-            "random_state",
-            RANDOM_STATE
-        )
-
-        mlflow.log_metric(
-            "accuracy",
-            accuracy
-        )
-
-        mlflow.log_metric(
-            "roc_auc",
-            roc_auc
+        # 📊 evaluation
+        accuracy, roc_auc, report = evaluate_model(
+            train_pipeline, X_test, Y_test
         )
         
-      
-        mlflow.log_text(
-               report,
-              "classification_report.txt"
+        inference_model = build_inference_pipeline(
+            train_pipeline,
+            preprocessor
         )
-        mlflow.log_param("max_iter", 1000)       
+
+        mlflow.log_metric("accuracy", accuracy)
+        mlflow.log_metric("roc_auc", roc_auc)
+        mlflow.log_text(report, "report.txt")
 
         mlflow.sklearn.log_model(
-            sk_model=pipeline_lr,
+            inference_model,
             artifact_path="model"
         )
+        
+        save_model(
+            inference_model,
+            model.__class__.__name__ 
+        )
 
-        save_model(pipeline_lr)
-       
+        return inference_model, X_test, Y_test
+#*******************
+def build_inference_pipeline(train_pipeline, preprocessor):
 
-    return pipeline_lr,X_test,Y_test
+    model = train_pipeline.named_steps["model"]
 
-def save_model(model):
-    dump(model, MODEL_PATH) 
+    inference_pipeline = SkPipeline([
+        ("preprocess", preprocessor),
+        ("model", model)
+    ])
+    
+    
+    return inference_pipeline
 
-
+def save_model(model, name):
+    path = Path(MODELS_DIR) / f"{name}.joblib"
+    dump(model, path)
 
 if __name__ == "__main__":
-    train_model()
 
+    for model in MODELS.values():
 
+        train_pipeline, X_test, Y_test = train_model(model)       
+
+        
+
+    
+        

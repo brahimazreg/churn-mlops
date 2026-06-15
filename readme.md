@@ -1,156 +1,97 @@
-# Churn Prediction MLOps Project
+# 📊 Churn Prediction MLOps Project
 
-## Overview
-
-This project implements an end-to-end MLOps pipeline for customer churn prediction using a Logistic Regression model. It includes:
-
-* Model training and evaluation
-* Experiment tracking with MLflow
-* FastAPI prediction service
-* Prediction logging
-* Streamlit monitoring dashboard
-* Basic model monitoring metrics
-
-## Project Structure
-
-```text
-churn-mlops/
-│
-├── src/
-│   ├── api.py
-│   ├── predict.py
-│   ├── train.py
-│   ├── config.py
-│   └── ...
-│
-├── models/
-│   └── churn_model_lr.joblib
-│
-├── logs/
-│   └── predictions.jsonl
-│
-├── streamlit_app.py
-├── requirements.txt
-├── README.md
-└── mlflow.db
-```
+End-to-end Machine Learning + MLOps system for predicting customer churn.
 
 ---
 
-## Features
+## 🚀 Overview
 
-### Model Training
+This project includes:
 
-* Logistic Regression classifier
-* Data preprocessing and feature engineering
-* Model serialization with Joblib
-
-### Experiment Tracking
-
-* MLflow integration
-* Parameter logging
-* Metrics logging
-* Model version tracking
-
-### Prediction API
-
-Built with FastAPI.
-
-Endpoints:
-
-| Method | Endpoint   | Description            |
-| ------ | ---------- | ---------------------- |
-| GET    | `/`        | Health message         |
-| GET    | `/health`  | Service health check   |
-| POST   | `/predict` | Predict customer churn |
-| GET    | `/metrics` | Monitoring metrics     |
-
-### Monitoring Dashboard
-
-Built with Streamlit.
-
-Dashboard displays:
-
-* Total predictions
-* Churn rate
-* Average latency
-* Prediction distribution
-* Latency trends
+- Data preprocessing & feature engineering
+- ML models: Logistic Regression, Random Forest, XGBoost
+- SMOTE for class imbalance
+- MLflow experiment tracking
+- FastAPI inference API
+- Streamlit monitoring dashboard
+- Docker containerization
+- Pytest testing
 
 ---
 
-## Installation
+## 🏗 Architecture
 
-### Clone Repository
+Raw Data → Processing → Train/Test Split → SMOTE → Model Training → Evaluation → MLflow Logging → FastAPI → Streamlit Dashboard
+
+---
+
+## 📁 Project Structure
+
+- src/
+- models/
+- logs/
+- tests/
+- streamlit_app.py
+- docker-compose.yml
+- Dockerfile
+- README.md
+
+---
+
+## ⚙️ Setup
+
+### Clone repository
 
 ```bash
 git clone https://github.com/brahimazreg/churn-mlops.git
 cd churn-mlops
-```
 
-### Create Virtual Environment
+Install dependencies
+--------------------
 
-```bash
-python -m venv venv
-```
-
-Activate environment:
-
-Windows:
-
-```bash
-venv\Scripts\activate
-```
-
-Linux/Mac:
-
-```bash
-source venv/bin/activate
-```
-
-### Install Dependencies
-
-```bash
 pip install -r requirements.txt
-```
 
----
+Run API (FastAPI)
+Local  :  uvicorn src.api:app --reload
+Docker :  docker compose up --build
 
-## Running the API
+API will be available at:
+-------------------------
 
-Start the FastAPI server:
-
-```bash
-uvicorn src.api:app --reload
-```
-
-API documentation:
-
-```text
 http://localhost:8000/docs
-```
 
----
-
-## Running the Dashboard
-
-Start Streamlit:
-
-```bash
+Streamlit Monitoring Dashboard
+------------------------------
 streamlit run streamlit_app.py
-```
 
-Dashboard URL:
+MLflow Tracking
+---------------
 
-```text
-http://localhost:8501
-```
+mlflow ui 
+then open : http://127.0.0.1:5000
 
----
+Docker Services
+----------------
+FastAPI → http://localhost:8000
+Swagger UI → http://localhost:8000/docs
+Streamlit → http://localhost:8501
 
-## Example Prediction Request
+Testing
+--------
 
-```json
+pytest
+
+Models Used
+-----------
+Logistic Regression
+Random Forest
+XGBoost
+
+Best model: XGBoost (~0.82 ROC-AUC)
+
+Example Prediction Request
+--------------------------
+
 {
   "gender": "Male",
   "SeniorCitizen": 0,
@@ -172,85 +113,28 @@ http://localhost:8501
   "MonthlyCharges": 75.0,
   "TotalCharges": 900.0
 }
-```
 
-Response:
+Live Deployment
+---------------
+API:
+https://churn-mlops-uh54.onrender.com
 
-```json
-{
-  "prediction": 1,
-  "probability": 0.90,
-  "latency_ms": 42.15
-}
-```
+Swagger UI:
+https://churn-mlops-uh54.onrender.com/docs
 
----
 
-## Logging
+Technologies Used
+-----------------
+Python
+Pandas
+Scikit-learn
+XGBoost
+FastAPI
+Streamlit
+MLflow
+Docker
+Joblib
 
-Predictions are stored in:
+Author : Brahim Azreg
 
-```text
-logs/predictions.jsonl
-```
-
-Each prediction record contains:
-
-* Timestamp
-* Input features
-* Prediction
-* Probability
-* Inference latency
-
----
-
-## Monitoring Metrics
-
-The API exposes monitoring statistics through:
-https://churn-mlops-uh54.onrender.com 
-```text
-GET /metrics
-```
-
-Example response:
-
-```json
-{
-  "total_predictions": 25,
-  "churn_predictions": 18,
-  "churn_rate": 0.72
-}
-```
-
----
-
-## Future Improvements
-
-* Model drift detection
-* Data quality monitoring
-* Prometheus integration
-* Grafana dashboards
-* Docker containerization
-* CI/CD pipeline with GitHub Actions
-* Automated retraining
-
----
-
-## Technologies Used
-
-* Python
-* Pandas
-* Scikit-learn
-* FastAPI
-* Streamlit
-* MLflow
-* Joblib
-* Uvicorn
-
----
-
-## Author   
-
-Brahim Azreg
-
-Developed as an MLOps learning project demonstrating model deployment, monitoring, and experiment tracking workflows.
+MLOps churn prediction project built for production-style machine learning practice.

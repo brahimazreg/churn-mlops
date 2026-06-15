@@ -24,12 +24,6 @@ df["Churn"] = df["Churn"].map({
     "Yes": 1
 })
 
-df["tenure_group"] = pd.cut(
-    df["tenure"],
-    bins=[0, 12, 24, 36, 48, 60, 72],
-    labels=["1-12", "13-24", "25-36", "37-48", "49-60", "61-72"]
-)
-
 X = df.drop(columns=["customerID", "Churn"])
 Y = df["Churn"]
 

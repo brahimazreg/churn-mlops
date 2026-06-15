@@ -2,13 +2,13 @@ from fastapi import FastAPI
 from joblib import load
 import pandas as pd
 from src.predict import predict
-from src.config import MODEL_PATH
 from pydantic import BaseModel
 from datetime import datetime
 import json
 from pathlib import Path
 import time
 from src.config import LOG_FILE
+from src.config import MODELS_DIR , DEFAULT_MODEL
 
 
 prediction_count = 0
@@ -18,7 +18,12 @@ app = FastAPI(title="Churn Prediction API",
               version="1.0.0"
               )
 
-model = load(MODEL_PATH)
+model_path = Path(MODELS_DIR) / DEFAULT_MODEL
+model = load(model_path)
+
+print("MODEL TYPE:", type(model)) # for debug
+
+
 
 from pydantic import BaseModel
 
@@ -90,6 +95,7 @@ def predict_api(data: CustomerInput):
         latency
     )
 
+    
 
     return {
         "prediction": int(pred[0]),

@@ -1,18 +1,21 @@
 from joblib import load
-from src.config import MODEL_PATH
-from src.features import add_features
+from src.config import MODELS_DIR , DEFAULT_MODEL
 from src.monitoring import log_prediction
+from pathlib import Path 
 import time
 
+model_path = Path(MODELS_DIR) / DEFAULT_MODEL
+model = load(model_path)
 
-model = load(MODEL_PATH)
 
 def predict(df):
 
-    df = add_features(df)
+    
     start = time.time()
     pred = model.predict(df)
     prob = model.predict_proba(df)[:, 1]
+
+    print("PROB:", prob)   # TEMP DEBUG
     
     latency = time.time() - start
     # logging (safe conversion)
